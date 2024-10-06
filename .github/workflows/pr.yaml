@@ -6,9 +6,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-go@v1
-      - run: |
-          git clone git@github.com:crandles/kubectl-validate.git
+      - uses: actions/setup-go@v5
+      - run: | # Install from fork that adds lint output: https://github.com/crandles/kubectl-validate/tree/lint-output
+          git clone https://github.com/crandles/kubectl-validate.git
           cd kubectl-validate
+          git checkout lint-output
+          go mod download
           go build
-          
+          cd ..
+          touch validate.out && ./kubectl-validate/kubectl-validate configmap.yaml -o lint > validate.out || true
+      - name: Run reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          go install github.com/reviewdog/reviewdog/cmd/reviewdog@latest
+          cat validate.out | $(go env GOPATH)/bin/reviewdog -f=golint -reporter=github-pr-check -fail-level=any -tee
