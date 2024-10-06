@@ -1,0 +1,14 @@
+on:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v1
+      - run: |
+          git clone git@github.com:crandles/kubectl-validate.git
+          cd kubectl-validate
+          go build
+          
