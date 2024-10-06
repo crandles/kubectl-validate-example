@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: demo-invalid-configmap
 data:
-  key: 123
+  key: "example valid value"
